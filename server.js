@@ -12,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect MongoDB
+// Connect MongoDB system
 connectDB();
 
 // Routes
