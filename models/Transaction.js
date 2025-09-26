@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
 
 const transactionSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
+  user: {
+    type: String,
     ref: "User",
-    required: true,
   },
   type: {
     type: String,
-    enum: ["addMoney", "cashout", "sendMoney"],
+    enum: ["addmoney", "cashout", "sendmoney"], // ✅ সব ছোট হাতের
     required: true,
   },
   amount: {
@@ -20,7 +19,7 @@ const transactionSchema = new mongoose.Schema({
     enum: ["bank", "card", "mobile"],
   },
   details: {
-    type: Object, // Store method-specific details like account number, card number
+    type: Object, // method-specific info like account/card/mobile number
   },
   fee: {
     type: Number,
@@ -40,4 +39,5 @@ const transactionSchema = new mongoose.Schema({
 const Transaction =
   mongoose.models.Transaction ||
   mongoose.model("Transaction", transactionSchema);
+
 export default Transaction;
