@@ -1,8 +1,10 @@
 import express from "express";
-import { cashout } from "../controllers/walletController.js";
+import { addMoney, cashout, current } from "../controllers/walletController.js";
 
 const router = express.Router();
 
-router.post("/", cashout);
+router.post("/addmoney/", addMoney);
+router.post("/cashout/", cashout);
+router.get("/current/", current);
 
 export default router;
