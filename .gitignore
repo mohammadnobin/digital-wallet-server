@@ -1,2 +1,5 @@
 node_modules/
 .env
+.vercel
+vercel.json
+serviceAccountKey.json
