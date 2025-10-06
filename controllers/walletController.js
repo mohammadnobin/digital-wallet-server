@@ -10,8 +10,7 @@ export const cashout = async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
-    // Debug: check userId received
-    console.log("Received user:", user);
+
 
     // Find user
     const userDemo = await User.findOne({ email: user });
@@ -66,7 +65,6 @@ export const addMoney = async (req, res) => {
     }
 
     // Debug: check userId received
-    console.log("Received userId:", user);
 
     // Find user
     const userDemo = await User.findOne({ email: user });
@@ -106,7 +104,6 @@ export const addMoney = async (req, res) => {
 export const current = async (req, res) => {
   try {
     const { email } = req.query;
-    console.log(email);
     if (!email)
       return res
         .status(400)
