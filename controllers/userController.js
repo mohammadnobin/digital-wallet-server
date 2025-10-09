@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 // @desc Add new user
 export const addUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-
 
     const userExists = await User.findOne({ email });
     if (userExists)
@@ -18,10 +18,22 @@ export const addUser = async (req, res) => {
       password: hashedPassword,
       balance: 0,
     });
-    const { password: _, ...userWithoutPassword } = user.toObject();
+
+    const token = jwt.sign(
+      { email: user.email, userId: user._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.status(201).json({
       message: "User created successfully",
-      user: userWithoutPassword,
+      accessToken: token,
+      user: {
+        name: user.name,
+        email: user.email,
+        balance: user.balance,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -40,7 +52,7 @@ export const getUsers = async (req, res) => {
 // @desc Get user by email
 export const getUserByEmail = async (req, res) => {
   try {
-    const email = req.query.email; 
+    const email = req.query.email;
     if (!email) {
       return res.status(400).json({ message: "Email query is required" });
     }
