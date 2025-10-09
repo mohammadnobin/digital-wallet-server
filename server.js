@@ -20,7 +20,6 @@ connectDB();
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/wallets", walletRoutes);
-
 // Default route
 app.get("/", (req, res) => {
   res.send("Digital Wallet API running...");
