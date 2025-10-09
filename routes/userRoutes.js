@@ -3,11 +3,14 @@ import {
   addUser,
   getUserByEmail,
   getUsers,
+  login,
 } from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.post("/", addUser);
+router.post("/post", addUser);
+router.post("/login", login);
+
 router.get("/", getUsers);
 router.get("/email", getUserByEmail);
 
