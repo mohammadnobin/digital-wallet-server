@@ -40,6 +40,40 @@ export const addUser = async (req, res) => {
   }
 };
 
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.find({ email });
+
+    if (user) {
+      const isValidPassword = await bcrypt.compare(password, user[0].password);
+      if (isValidPassword) {
+        const token = jwt.sign(
+          { email: user.email, userId: user._id },
+          process.env.JWT_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
+        res.status(200).json({
+          message: "User Login Successfully",
+          accessToken: token,
+          data: {
+            name: user[0].name,
+            email,
+            userId: user[0]._id,
+          },
+        });
+      } else {
+        res.status(500).send("err.message is");
+      }
+    }
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
+};
+
 // @desc Get all users
 export const getUsers = async (req, res) => {
   try {
