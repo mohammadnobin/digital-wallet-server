@@ -3,21 +3,44 @@ import Request from "../models/Request.js";
 import User from "../models/userModel.js"; // ধরে নিলাম User মডেল আছে
 
 // সব request দেখার জন্য (user perspective)
+// export const getUserRequests = async (req, res) => {
+//   try {
+//     const email = req.query.email; // ইউজারের email
+
+//     // Pending requests যেখানে receiver
+//     const pending = await Request.find({ receiverEmail: email, status: "Pending" }).sort({ createdAt: -1 });
+
+//     // History requests (Received / Declined)
+//     const history = await Request.find({ receiverEmail: email, status: { $in: ["Received","Declined"] } }).sort({ createdAt: -1 });
+
+//     res.status(200).json({ success: true, data: { pending, history } });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
 export const getUserRequests = async (req, res) => {
   try {
-    const email = req.query.email; // ইউজারের email
+    const email = req.query.email;
 
-    // Pending requests যেখানে receiver
-    const pending = await Request.find({ receiverEmail: email, status: "Pending" }).sort({ createdAt: -1 });
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
 
-    // History requests (Received / Declined)
-    const history = await Request.find({ receiverEmail: email, status: { $in: ["Received","Declined"] } }).sort({ createdAt: -1 });
+    // আমি যাদেরকে request পাঠিয়েছি
+    const sent = await Request.find({ senderEmail: email }).sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, data: { pending, history } });
+    // যারা আমাকে request দিয়েছে
+    const received = await Request.find({ receiverEmail: email }).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      data: { sent, received },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // নতুন request তৈরি করার জন্য
 export const createRequest = async (req, res) => {
