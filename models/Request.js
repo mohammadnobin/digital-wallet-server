@@ -27,7 +27,7 @@ const requestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending','Received','Declined'],
+ enum: ['Pending', 'Approved', 'Declined'],
     default: 'Pending',
   },
   createdAt: {
@@ -40,3 +40,9 @@ const requestSchema = new mongoose.Schema({
 const Request = mongoose.model("Request", requestSchema);
 
 export default Request;
+
+
+
+
+// 123456Ab#
+// jannatulnila74@gmail.com
