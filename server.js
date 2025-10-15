@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import requestRoutes from "./routes/requestRoutes.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
@@ -26,6 +27,7 @@ connectDB();
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/wallets", walletRoutes);
+app.use("/api/requests", requestRoutes)
 // Default route
 app.get("/", (req, res) => {
   res.send("Digital Wallet API running...");
