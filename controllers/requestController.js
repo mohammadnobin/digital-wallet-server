@@ -1,9 +1,8 @@
 
-import Request from "../models/Request.js";
-import User from "../models/userModel.js"; // ধরে নিলাম User মডেল আছে
+import Request from "../models/RequestModel.js";
+import User from "../models/userModel.js"; 
 
-// সব request দেখার জন্য (user perspective)
-
+// getUserRequests api
 export const getUserRequests = async (req, res) => {
   try {
     const email = req.query.email;
@@ -12,10 +11,7 @@ export const getUserRequests = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
 
-    // আমি যাদেরকে request পাঠিয়েছি
     const sent = await Request.find({ senderEmail: email }).sort({ createdAt: -1 });
-
-    // যারা আমাকে request দিয়েছে
     const received = await Request.find({ receiverEmail: email }).sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -26,9 +22,7 @@ export const getUserRequests = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
-// নতুন request তৈরি করার জন্য
+// createRequest api
 export const createRequest = async (req, res) => {
   try {
     const { senderEmail, receiverEmail, amount, category, dueDate, message } = req.body;
@@ -51,9 +45,7 @@ export const createRequest = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// রিকুয়েস্ট Approve / Decline করার জন্য
-
+// updateRequestStatus api
 export const updateRequestStatus = async (req, res) => {
   try {
     const { requestId, status } = req.body;
@@ -62,7 +54,7 @@ export const updateRequestStatus = async (req, res) => {
     if (!request)
       return res.status(404).json({ success: false, message: "Request not found" });
 
-    // শুধুমাত্র Approved হলে টাকা ট্রান্সফার হবে
+
     if (status === "Approved") {
       const sender = await User.findOne({ email: request.senderEmail });
       const receiver = await User.findOne({ email: request.receiverEmail });
@@ -72,7 +64,6 @@ export const updateRequestStatus = async (req, res) => {
           .status(404)
           .json({ success: false, message: "Sender or Receiver not found" });
 
-      // ✅ Receiver অর্থাৎ current user-এর balance check
       if (receiver.balance < request.amount) {
         return res.status(400).json({
           success: false,
@@ -80,14 +71,12 @@ export const updateRequestStatus = async (req, res) => {
         });
       }
 
-      // 💸 টাকা ট্রান্সফার: receiver → sender
       receiver.balance -= request.amount;
       sender.balance += request.amount;
 
       await receiver.save();
       await sender.save();
 
-      // status update
       request.status = "Approved";
       await request.save();
 
@@ -98,7 +87,6 @@ export const updateRequestStatus = async (req, res) => {
       });
     }
 
-    // ❌ Decline করলে শুধু status update হবে
     if (status === "Declined") {
       request.status = "Declined";
       await request.save();
@@ -110,7 +98,6 @@ export const updateRequestStatus = async (req, res) => {
       });
     }
 
-    // অন্য কিছু হলে invalid
     res.status(400).json({ success: false, message: "Invalid status" });
   } catch (error) {
     console.error("Error updating request status:", error);

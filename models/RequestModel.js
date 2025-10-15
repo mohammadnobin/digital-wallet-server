@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 const requestSchema = new mongoose.Schema({
-  senderEmail: {       // যে ইউজার রিকুয়েস্ট পাঠাচ্ছে
+  senderEmail: {     
     type: String,
     required: true,
   },
-  receiverEmail: {     // যে ইউজারকে রিকুয়েস্ট পাঠানো হয়েছে
+  receiverEmail: {    
     type: String,
     required: true,
   },
@@ -40,9 +40,3 @@ const requestSchema = new mongoose.Schema({
 const Request = mongoose.model("Request", requestSchema);
 
 export default Request;
-
-
-
-
-// 123456Ab#
-// jannatulnila74@gmail.com
