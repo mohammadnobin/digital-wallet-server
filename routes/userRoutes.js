@@ -11,7 +11,7 @@ import { verifyJWT } from "../middlewares/authMiddleware.js";
 const router = express.Router();
 router.post("/", registerUser);
 router.post("/login", loginUser)
-router.post("/logout", verifyJWT,  logoutUser);
+router.post("/logout",   logoutUser);
 router.get("/",verifyJWT, getUsers);
 router.get("/email", getUserByEmail);
 
