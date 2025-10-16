@@ -1,11 +1,11 @@
 import mongoose from 'mongoose';
 
 const requestSchema = new mongoose.Schema({
-  senderEmail: {       // যে ইউজার রিকুয়েস্ট পাঠাচ্ছে
+  senderEmail: {     
     type: String,
     required: true,
   },
-  receiverEmail: {     // যে ইউজারকে রিকুয়েস্ট পাঠানো হয়েছে
+  receiverEmail: {    
     type: String,
     required: true,
   },
@@ -27,7 +27,7 @@ const requestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending','Received','Declined'],
+ enum: ['Pending', 'Approved', 'Declined'],
     default: 'Pending',
   },
   createdAt: {

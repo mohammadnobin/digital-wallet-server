@@ -28,9 +28,9 @@ const registerUser = async (req, res) =>{
         name,
         email,
         password,
+
     })
     const createduser = await User.findById(user._id).select("-password")
-
     if (!createduser) {
       return res.status(500).json({ message: "User creation failed" });
     }
@@ -73,6 +73,7 @@ const registerUser = async (req, res) =>{
     const loggedInUser = await User.findById(user._id).select(
       "-password"
     );
+    console.log(loggedInUser);
   
     const options = {
       httpOnly: true,
@@ -175,7 +176,7 @@ export const getUserByEmail = async (req, res) => {
       return res.status(400).json({ message: "Email query is required" });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
