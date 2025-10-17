@@ -12,5 +12,4 @@ const remittanceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Remittance = mongoose.model("Remittance", remittanceSchema);
-export default Remittance;
+export default mongoose.model("Remittance", remittanceSchema);
