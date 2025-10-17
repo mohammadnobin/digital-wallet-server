@@ -4,6 +4,8 @@ import { sendRemittance, getUserRemittances } from "../controllers/remittanceCon
 const router = express.Router();
 
 router.post("/send", sendRemittance);
-router.get("/", getUserRemittances);
+router.get("/history", getUserRemittances);
 
 export default router;
+
+
