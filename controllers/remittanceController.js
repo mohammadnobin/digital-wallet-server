@@ -1,20 +1,17 @@
 import User from "../models/userModel.js";
 import Remittance from "../models/RemittanceModel.js";
 
-// Dummy exchange rate (later API / real-time use করতে পারবে)
+// ✅ Only USD ↔ BDT exchange rates
 const exchangeRates = {
-  BDT: { USD: 0.0083, BDT: 1 },
-  USD: { BDT: 120, USD: 1 }
+  USD: { BDT: 110.45 },
+  BDT: { USD: 0.009 }
 };
 
-// Send money API
 export const sendRemittance = async (req, res) => {
   try {
     const { senderEmail, receiverEmail, amount } = req.body;
-
-    // Validation
-    if (!senderEmail || !receiverEmail || amount == null || amount <= 0) {
-      return res.status(400).json({ success: false, message: "Invalid request data" });
+    if (!senderEmail || !receiverEmail || !amount) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
     }
 
     const sender = await User.findOne({ email: senderEmail });
@@ -24,13 +21,14 @@ export const sendRemittance = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Exchange rate check
-    const rate = exchangeRates[sender.currency]?.[receiver.currency];
-    if (!rate) {
-      return res.status(400).json({ success: false, message: "Exchange rate not available" });
+    // ✅ Only allow USD ↔ BDT
+    if ((sender.currency === "USD" && receiver.currency !== "BDT") ||
+        (sender.currency === "BDT" && receiver.currency !== "USD")) {
+      return res.status(400).json({ success: false, message: "Only USD ↔ BDT remittance allowed" });
     }
 
-    const amountReceived = parseFloat((amount * rate).toFixed(2));
+    const rate = exchangeRates[sender.currency][receiver.currency];
+    const amountReceived = amount * rate;
 
     if (sender.balance < amount) {
       return res.status(400).json({ success: false, message: "Insufficient balance" });
@@ -43,34 +41,37 @@ export const sendRemittance = async (req, res) => {
     await sender.save();
     await receiver.save();
 
-    // Save remittance history
-    const remittance = await Remittance.create({
+    // Save remittance
+    await Remittance.create({
       senderEmail,
       receiverEmail,
       amountSent: amount,
       amountReceived,
       fromCurrency: sender.currency,
       toCurrency: receiver.currency,
-       rateUsed: rate,   
-      status: "Completed"
+      rateUsed: rate,
+      status: "Completed",
     });
 
     return res.status(200).json({
       success: true,
+      message: "Remittance sent successfully!",
       data: {
-        remittanceId: remittance._id,
         amountSent: amount,
         amountReceived,
         fromCurrency: sender.currency,
-        toCurrency: receiver.currency
-      }
+        toCurrency: receiver.currency,
+        rateUsed: rate,
+      },
     });
 
-  } catch (err) {
-    console.error("Remittance error:", err);
+  } catch (error) {
+    console.error("Remittance error:", error);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
 // Get user remittance history
 export const getUserRemittances = async (req, res) => {
   try {
