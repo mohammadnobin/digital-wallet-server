@@ -100,9 +100,13 @@ const userSchema = new Schema(
     password: { type: String, required: [true, "Password is required"] },
     image: {
       type: String,
-      default: "https://i.ibb.co.com/GQGPCHNB/avatar-nerd-man-vector-42477860.webp", // ডিফল্ট প্রোফাইল ছবি (তুমি চাইলে নিজস্ব URL দিতে পারো)
+      default: "https://i.ibb.co.com/GQGPCHNB/avatar-nerd-man-vector-42477860.webp",
     },
-    balance: { type: Number, default: 0 },
+    balance: {
+      type: Number,
+      default: 0,
+      set: (v) => parseFloat(v.toFixed(2)) 
+    },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     country: { type: String, default: "Bangladesh" },
     currency: { type: String, default: "BDT" },
