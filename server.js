@@ -5,6 +5,7 @@ import userRoutes from "./routes/userRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import remittanceRoutes from "./routes/remittanceRoutes.js";
+import cardsRoutes from "./routes/cardRoutes.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
@@ -30,6 +31,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/wallets", walletRoutes);
 app.use("/api/requests", requestRoutes)
 app.use("/api/remittance", remittanceRoutes);
+app.use("/api/cards", cardsRoutes);
 // Default route
 app.get("/", (req, res) => {
   res.send("Digital Wallet API running...");
