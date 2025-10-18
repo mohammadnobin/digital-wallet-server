@@ -1,7 +1,7 @@
 import User from "../models/userModel.js";
 import Remittance from "../models/RemittanceModel.js";
 
-// ✅ Only USD ↔ BDT exchange rates
+// Only USD ↔ BDT exchange rates
 const exchangeRates = {
   USD: { BDT: 110.45 },
   BDT: { USD: 0.009 }
@@ -21,7 +21,7 @@ export const sendRemittance = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // ✅ Only allow USD ↔ BDT
+    //  Only allow USD ↔ BDT
     if ((sender.currency === "USD" && receiver.currency !== "BDT") ||
         (sender.currency === "BDT" && receiver.currency !== "USD")) {
       return res.status(400).json({ success: false, message: "Only USD ↔ BDT remittance allowed" });
