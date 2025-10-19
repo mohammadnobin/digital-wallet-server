@@ -2,6 +2,7 @@
 import express from "express";
 import {
   createBill,
+  deleteBill,
   getBills,
 } from "../controllers/billController.js";
 
@@ -12,5 +13,7 @@ router.post("/", createBill);
 
 // get bills (optionally filter by user)
 router.get("/", getBills);
+// DELETE a bill
+router.delete("/bill/:id", deleteBill);
 
 export default router;
