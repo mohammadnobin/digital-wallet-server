@@ -1,5 +1,6 @@
 import express from "express";
 import { sendMoney, getTransfersByEmail } from "../controllers/transferController.js";
+import { verifyJWT } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -7,6 +8,6 @@ const router = express.Router();
 router.post("/send", sendMoney);
 
 // GET /api/transfers?email=user@example.com
-router.get("/", getTransfersByEmail);
+router.get("/", verifyJWT, getTransfersByEmail);
 
 export default router;
