@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["addmoney", "cashout", "sendmoney"], // ✅ সব ছোট হাতের
+    enum: ["addmoney", "cashout", "sendmoney"], 
     required: true,
   },
   amount: {
@@ -19,7 +19,7 @@ const transactionSchema = new mongoose.Schema({
     enum: ["bank", "card", "mobile"],
   },
   details: {
-    type: Object, // method-specific info like account/card/mobile number
+    type: Object, 
   },
   fee: {
     type: Number,
