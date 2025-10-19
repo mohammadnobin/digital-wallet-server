@@ -7,7 +7,7 @@ const transactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["addmoney", "cashout", "sendmoney"], // ✅ সব ছোট হাতের
+    enum: ["addmoney", "cashout", "sendmoney"], 
     required: true,
   },
   amount: {
