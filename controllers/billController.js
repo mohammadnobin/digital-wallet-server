@@ -42,3 +42,23 @@ export const getBills = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+// Delete bill
+export const deleteBill = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const bill = await SplitBill.findById(id);
+    if (!bill) {
+      return res.status(404).json({ success: false, message: "Bill not found" });
+    }
+
+    await SplitBill.findByIdAndDelete(id);
+
+    res.json({ success: true, message: "Bill deleted successfully", id });
+  } catch (err) {
+    console.error("Delete Bill Error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
