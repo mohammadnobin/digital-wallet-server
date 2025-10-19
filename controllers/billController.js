@@ -31,7 +31,7 @@ export const createBill = async (req, res) => {
 // Get all bills (optional filter by user)
 export const getBills = async (req, res) => {
   try {
-    const { user } = req.query; // email
+    const { user } = req.query;
     let query = {};
     if (user) query.createdBy = user;
 
