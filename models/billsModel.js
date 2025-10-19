@@ -11,9 +11,9 @@ const splitBillSchema = new mongoose.Schema({
     enum: ["pending", "paid", "settled"],
     default: "pending",
   },
-  yourShare: { type: Number }, // total / people
-  icon: { type: String, default: "Utensils" }, // icon name
-  createdBy: { type: String, ref: "User", required: true }, // email or userId
+  yourShare: { type: Number }, 
+  icon: { type: String, default: "Utensils" }, 
+  createdBy: { type: String, ref: "User", required: true }, 
   createdAt: { type: Date, default: Date.now },
 });
 

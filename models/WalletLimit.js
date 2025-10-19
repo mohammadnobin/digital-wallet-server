@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
-// type: mongoose.Schema.Types.ObjectId,
+
 
 const walletLimitSchema = new mongoose.Schema({
   user: {
-    //
     type: String,
     ref: "User",
   },
@@ -13,18 +12,18 @@ const walletLimitSchema = new mongoose.Schema({
   },
   amountUsed: {
     type: Number,
-    default: 0, // কত টাকা খরচ হয়েছে
+    default: 0,
   },
   amountAdded: {
     type: Number,
-    default: 0, // কত টাকা addMoney দিয়ে যোগ হয়েছে
+    default: 0,
   },
   method: {
     type: String,
     enum: ["bank", "card", "mobile"],
   },
   details: {
-    type: String, // extra info like reference / transactionId
+    type: String,
   },
   status: {
     type: String,
