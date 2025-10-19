@@ -55,24 +55,38 @@
 import Transfer from "../models/transferModel.js";
 import User from "../models/userModel.js"; // ✅ user model import korte hobe
 
-// 💸 Send Money Controller
 export const sendMoney = async (req, res) => {
   try {
     const { senderEmail, recipientEmail, amount, speed, message } = req.body;
 
-    // প্রয়োজনীয় ফিল্ড চেক
+    // 🧩 প্রয়োজনীয় ফিল্ড চেক
     if (!senderEmail || !recipientEmail || !amount) {
       return res.status(400).json({ message: "Missing required fields." });
     }
 
-    // ✅ চেক করো recipient ডাটাবেজে আছে কিনা
-    const recipientUser = await User.findOne({ email: recipientEmail });
-    if (!recipientUser) {
+    // 🔍 সেন্ডার ও রিসিপিয়েন্ট খুঁজে বের করা
+    const sender = await User.findOne({ email: senderEmail });
+    const recipient = await User.findOne({ email: recipientEmail });
+
+    if (!sender) {
+      return res.status(404).json({ message: "Sender not found." });
+    }
+    if (!recipient) {
       return res.status(404).json({ message: "Recipient not found or invalid email." });
     }
 
-    // ✅ ফি ক্যালকুলেশন (উদাহরণ)
+    // 💰 ফি ক্যালকুলেশন
     const fee = speed === "instant" ? 1.99 : 0;
+    const totalDeduct = parseFloat(amount) + fee;
+
+    // ⚠️ সেন্ডারের ব্যালেন্স চেক
+    if (sender.balance < totalDeduct) {
+      return res.status(400).json({ message: "Insufficient balance." });
+    }
+
+    // 🧮 ব্যালেন্স আপডেট
+    sender.balance -= totalDeduct; // সেন্ডারের থেকে কমানো হবে
+    recipient.balance += parseFloat(amount); // রিসিভারের ব্যালেন্সে যোগ হবে
 
     // ✅ নতুন ট্রান্সফার তৈরি
     const transfer = new Transfer({
@@ -85,10 +99,13 @@ export const sendMoney = async (req, res) => {
       status: "completed",
     });
 
+    // 🔄 ডেটা সেভ
+    await sender.save();
+    await recipient.save();
     await transfer.save();
 
     res.status(201).json({
-      message: "Money transfer successful!",
+      message: `Successfully sent $${amount} to ${recipientEmail}`,
       transfer,
     });
   } catch (error) {
