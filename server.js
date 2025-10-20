@@ -8,6 +8,7 @@ import remittanceRoutes from "./routes/remittanceRoutes.js";
 import cardsRoutes from "./routes/cardRoutes.js";
 import splitBillRoutes from "./routes/billRoutes.js";
 import transferRoutes from "./routes/transferRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
@@ -15,12 +16,10 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
 // Middleware
-
 app.use(cookieParser());
 app.use(cors({
-  origin: ["http://localhost:3000","https://digital-wallet-steel.vercel.app"],
+  origin: ["http://localhost:3000","https://digital-wallet-sage.vercel.app"],
   credentials: true
 }));
 app.use(express.json());
@@ -36,6 +35,7 @@ app.use("/api/remittance", remittanceRoutes);
 app.use("/api/cards", cardsRoutes);
 app.use("/api/splitbills", splitBillRoutes);
 app.use("/api/transfers", transferRoutes );
+app.use("/api/transactions", transactionRoutes);
 // Default route
 app.get("/", (req, res) => {
   res.send("Digital Wallet API running...");
