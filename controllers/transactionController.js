@@ -26,3 +26,74 @@ export const getMyTransactions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+// export const getTransactionSummary = async (req, res) => {
+//   try {
+//     const email = req.user.email; // middleware দিয়ে user info এসেছে ধরে নিচ্ছি
+
+//     // সব completed transactions filter
+//     const transactions = await TransactionHistory.find({
+//       $or: [{ senderEmail: email }, { recipientEmail: email }],
+//       status: "completed"
+//     });
+
+//     const totalIncome = transactions
+//       .filter(t => t.amount > 0)
+//       .reduce((sum, t) => sum + t.amount, 0);
+
+//     const totalExpenses = Math.abs(
+//       transactions.filter(t => t.amount < 0).reduce((sum, t) => sum + t.amount, 0)
+//     );
+
+//     const totalBalance = totalIncome - totalExpenses;
+//     const totalSaved = totalBalance; // ধরছি saved = balance
+
+//     res.status(200).json({
+//       totalBalance,
+//       totalIncome,
+//       totalExpenses,
+//       totalSaved
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Server error", error: error.message });
+//   }
+// };
+
+
+export const getTransactionSummary = async (req, res) => {
+  try {
+    const userId = req.user._id; // middleware থেকে user info
+
+    // সব completed transactions filter
+    const transactions = await TransactionHistory.find({
+      userId: userId,
+      status: "completed"
+    });
+
+    // total income
+    const totalIncome = transactions
+      .filter(t => t.type === "addmoney" || t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // total expenses
+    const totalExpenses = transactions
+      .filter(t => t.type !== "addmoney" && t.amount > 0)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // balance
+    const totalBalance = totalIncome - totalExpenses;
+    const totalSaved = totalBalance; // ধরছি saved = balance
+
+    res.status(200).json({
+      totalBalance,
+      totalIncome,
+      totalExpenses,
+      totalSaved
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
