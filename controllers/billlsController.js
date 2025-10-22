@@ -4,17 +4,6 @@ import User from "../models/userModel.js";
 import { addTransaction } from "../helpers/transactionService.js"; 
 
 // ✅ Add new Bill
-// export const addBill = async (req, res) => {
-//   try {
-//     const bill = new Bill(req.body);
-//     await bill.save();
-//     res.status(201).json({ success: true, message: "Bill added successfully", bill });
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
-
-
 export const addBill = async (req, res) => {
   try {
     const { name, company, amount, dueDate, autoPay, color, icon, userEmail } = req.body;
@@ -55,13 +44,10 @@ export const addBill = async (req, res) => {
 // controllers/billController.js
 export const getBills = async (req, res) => {
   try {
-    // JWT থেকে auth middleware দিয়ে req.user.set করা থাকবে
     const email = req.user?.email;
     if (!email) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
-
-    // শুধু এই ইউজারের bill নাও
     const bills = await Bill.find({ userEmail: email });
 
     res.status(200).json({ success: true, bills });
