@@ -7,8 +7,6 @@ import { addTransaction } from "../helpers/transactionService.js";
 export const addBill = async (req, res) => {
   try {
     const { name, company, amount, dueDate, autoPay, color, icon, userEmail } = req.body;
-
-    // ✅ Validation check
     if (!name || !company || !amount || !dueDate || !userEmail) {
       return res.status(400).json({ success: false, message: "All required fields must be filled" });
     }
@@ -22,7 +20,7 @@ export const addBill = async (req, res) => {
       color: color || "bg-blue-500",
       icon: icon || "Zap",
       userEmail,
-      status: "pending", // default status
+      status: "pending", 
     });
 
     await bill.save();
@@ -57,7 +55,7 @@ export const getBills = async (req, res) => {
 };
 
 
-// ✅ Delete Bill
+// Delete Bill
 export const deleteBill = async (req, res) => {
   try {
     const { id } = req.params;
@@ -68,7 +66,6 @@ export const deleteBill = async (req, res) => {
   }
 };
 
-// ✅ Update Bill (e.g., autoPay, status)
 export const updateBill = async (req, res) => {
   try {
     const { id } = req.params;
@@ -78,45 +75,15 @@ export const updateBill = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-// export const payBill = async (req, res) => {
-//   try {
-//     const { id } = req.params; // bill id
-//     const {email} = req.user; 
-
-//     // 1️⃣ Bill খুঁজে বের করা
-//     const bill = await Bill.findById(id);
-//     if (!bill) return res.status(404).json({ success: false, message: "Bill not found" });
-//     if (bill.status === "paid") return res.status(400).json({ success: false, message: "Bill already paid" });
-
-//     // 2️⃣ User balance check
-//     const user = await User.findOne({ email: email });
-//     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-//     if (user.balance < bill.amount) return res.status(400).json({ success: false, message: "Insufficient balance" });
-
-//     // 3️⃣ Balance কমানো এবং Bill update করা
-//     user.balance -= bill.amount;
-//     await user.save();
-
-//     bill.status = "paid";
-//     bill.daysOverdue = 0;
-//     await bill.save();
-
-//     res.status(200).json({ success: true, message: "Bill paid successfully", bill, userBalance: user.balance });
-
-//   } catch (error) {
-//     res.status(500).json({ success: false, message: error.message });
-//   }
-// };
+//  Pay Bill
 export const payBill = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const { id } = req.params; // bill id
-    const { email } = req.user; // logged-in user
+    const { id } = req.params; 
+    const { email } = req.user;
 
-    // 1️⃣ Bill খুঁজে বের করা
     const bill = await Bill.findById(id).session(session);
     if (!bill) {
       await session.abortTransaction();
@@ -142,15 +109,12 @@ export const payBill = async (req, res) => {
       return res.status(400).json({ success: false, message: "Insufficient balance" });
     }
 
-    // 3️⃣ Balance কমানো এবং Bill update করা
     user.balance -= bill.amount;
     await user.save({ session });
 
     bill.status = "paid";
     bill.daysOverdue = 0;
     await bill.save({ session });
-
-    // 4️⃣ Transaction history add করা
     await addTransaction(
       {
         userId: user._id,
@@ -168,7 +132,6 @@ export const payBill = async (req, res) => {
       session
     );
 
-    // 5️⃣ Commit transaction
     await session.commitTransaction();
     session.endSession();
 
