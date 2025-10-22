@@ -14,19 +14,14 @@ export const addMoney = async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
-    // Find the user by email
     const userDemo = await User.findOne({ email: user }).session(session);
     if (!userDemo) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ message: "User not found" });
     }
-
-    // ✅ Increase user balance
     userDemo.balance += addAmount;
     await userDemo.save({ session });
-
-    // ✅ Add transaction history (using your service)
     const transaction = await addTransaction(
       {
         userId: userDemo._id,
@@ -41,7 +36,6 @@ export const addMoney = async (req, res) => {
       session
     );
 
-    // ✅ Commit the transaction (Mongo)
     await session.commitTransaction();
     session.endSession();
 
@@ -68,39 +62,31 @@ export const cashout = async (req, res) => {
   try {
     const { user, amount, method, details } = req.body;
 
-    // Convert amount
     const cashoutAmount = parseFloat(amount);
     if (isNaN(cashoutAmount) || cashoutAmount <= 0) {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
-    // ✅ Find user
     const userDemo = await User.findOne({ email: user }).session(session);
     if (!userDemo) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ message: "User not found" });
     }
-
-    // ✅ Check balance
     if (userDemo.balance < cashoutAmount) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ message: "Insufficient balance" });
     }
-
-    // ✅ Calculate fee (যদি প্রয়োজন থাকে)
     let fee = 0;
     if (method === "card") fee = (cashoutAmount * 2.5) / 100;
     if (method === "mobile") fee = (cashoutAmount * 1) / 100;
 
     const totalDeduct = cashoutAmount + fee;
 
-    // ✅ Deduct balance
     userDemo.balance -= totalDeduct;
     await userDemo.save({ session });
 
-    // ✅ Add Transaction History
     const transaction = await addTransaction(
       {
         userId: userDemo._id,
@@ -116,7 +102,6 @@ export const cashout = async (req, res) => {
       session
     );
 
-    // ✅ Commit Mongo Transaction
     await session.commitTransaction();
     session.endSession();
 
