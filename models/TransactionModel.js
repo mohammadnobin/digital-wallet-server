@@ -14,7 +14,8 @@ const transactionSchema = new mongoose.Schema({
     "request_paid",
     "request_declined",
     "request_declined",
-    "incoming_request"
+    "incoming_request",
+    "bill_payment"
   ], required: true },
   amount: { type: Number, required: true, min: 0 },
   currency: { type: String, default: "BDT" },
