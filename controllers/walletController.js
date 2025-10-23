@@ -1,7 +1,131 @@
+// import mongoose from "mongoose";
+// import User from "../models/userModel.js";
+// import { addTransaction } from "../helpers/transactionService.js";
+
+// export const addMoney = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+//   try {
+//     const { user, amount, method, details } = req.body;
+
+//     const addAmount = parseFloat(amount);
+//     if (isNaN(addAmount) || addAmount <= 0) {
+//       return res.status(400).json({ message: "Invalid amount" });
+//     }
+
+//     const userDemo = await User.findOne({ email: user }).session(session);
+//     if (!userDemo) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(404).json({ message: "User not found" });
+//     }
+//     userDemo.balance += addAmount;
+//     await userDemo.save({ session });
+//     const transaction = await addTransaction(
+//       {
+//         userId: userDemo._id,
+//         type: "addmoney",
+//         amount: addAmount,
+//         meta: {
+//           method,
+//           details,
+//         },
+//         status: "completed",
+//       },
+//       session
+//     );
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Money added successfully",
+//       transaction,
+//       updatedBalance: userDemo.balance,
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error("AddMoney Error:", error);
+//     return res.status(500).json({ message: "Server error", error: error.message });
+//   }
+// };
+
+
+
+// export const cashout = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+//   try {
+//     const { user, amount, method, details } = req.body;
+
+//     const cashoutAmount = parseFloat(amount);
+//     if (isNaN(cashoutAmount) || cashoutAmount <= 0) {
+//       return res.status(400).json({ message: "Invalid amount" });
+//     }
+
+//     const userDemo = await User.findOne({ email: user }).session(session);
+//     if (!userDemo) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(404).json({ message: "User not found" });
+//     }
+//     if (userDemo.balance < cashoutAmount) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ message: "Insufficient balance" });
+//     }
+//     let fee = 0;
+//     if (method === "card") fee = (cashoutAmount * 2.5) / 100;
+//     if (method === "mobile") fee = (cashoutAmount * 1) / 100;
+
+//     const totalDeduct = cashoutAmount + fee;
+
+//     userDemo.balance -= totalDeduct;
+//     await userDemo.save({ session });
+
+//     const transaction = await addTransaction(
+//       {
+//         userId: userDemo._id,
+//         type: "cashout",
+//         amount: cashoutAmount,
+//         meta: {
+//           method,
+//           details,
+//           fee,
+//         },
+//         status: "completed",
+//       },
+//       session
+//     );
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     res.json({
+//       success: true,
+//       message: "Cashout successful",
+//       transaction,
+//       remainingBalance: userDemo.balance,
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error("Cashout Error:", error);
+//     res.status(500).json({ message: "Server error", error: error.message });
+//   }
+// };
+
+
+
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import { addTransaction } from "../helpers/transactionService.js";
 
+// 🟢 Add Money Controller
 export const addMoney = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -14,24 +138,34 @@ export const addMoney = async (req, res) => {
       return res.status(400).json({ message: "Invalid amount" });
     }
 
+    // ✅ Find user
     const userDemo = await User.findOne({ email: user }).session(session);
     if (!userDemo) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ message: "User not found" });
     }
+
+    // ✅ Save previous balance
+    const balanceBefore = userDemo.balance;
+
+    // ✅ Update balance
     userDemo.balance += addAmount;
     await userDemo.save({ session });
+
+    // ✅ Save transaction
     const transaction = await addTransaction(
       {
-        userId: userDemo._id,
+        senderId: userDemo._id, // same user
+        receiverId: userDemo._id, // self transaction
         type: "addmoney",
         amount: addAmount,
+        currency: userDemo.currency || "BDT",
+        status: "completed",
         meta: {
           method,
           details,
         },
-        status: "completed",
       },
       session
     );
@@ -53,8 +187,7 @@ export const addMoney = async (req, res) => {
   }
 };
 
-
-
+// 🔴 Cashout Controller
 export const cashout = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -73,31 +206,41 @@ export const cashout = async (req, res) => {
       session.endSession();
       return res.status(404).json({ message: "User not found" });
     }
+
     if (userDemo.balance < cashoutAmount) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ message: "Insufficient balance" });
     }
+
+    // ✅ Fee calculation
     let fee = 0;
     if (method === "card") fee = (cashoutAmount * 2.5) / 100;
     if (method === "mobile") fee = (cashoutAmount * 1) / 100;
 
     const totalDeduct = cashoutAmount + fee;
 
+    // ✅ Save previous balance
+    const balanceBefore = userDemo.balance;
+
+    // ✅ Update balance
     userDemo.balance -= totalDeduct;
     await userDemo.save({ session });
 
+    // ✅ Add Transaction Record
     const transaction = await addTransaction(
       {
-        userId: userDemo._id,
+        senderId: userDemo._id,
+        receiverId: null, // cashout → system account
         type: "cashout",
         amount: cashoutAmount,
+        currency: userDemo.currency || "BDT",
+        status: "completed",
         meta: {
           method,
           details,
           fee,
         },
-        status: "completed",
       },
       session
     );
@@ -105,7 +248,7 @@ export const cashout = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.json({
+    return res.status(200).json({
       success: true,
       message: "Cashout successful",
       transaction,
@@ -115,9 +258,11 @@ export const cashout = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Cashout Error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
 
 export const current = async (req, res) => {
   try {

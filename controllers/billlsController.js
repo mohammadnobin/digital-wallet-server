@@ -76,6 +76,80 @@ export const updateBill = async (req, res) => {
   }
 };
 //  Pay Bill
+// export const payBill = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+//   try {
+//     const { id } = req.params; 
+//     const { email } = req.user;
+
+//     const bill = await Bill.findById(id).session(session);
+//     if (!bill) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(404).json({ success: false, message: "Bill not found" });
+//     }
+//     if (bill.status === "paid") {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ success: false, message: "Bill already paid" });
+//     }
+
+//     // 2️⃣ User balance check
+//     const user = await User.findOne({ email }).session(session);
+//     if (!user) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+//     if (user.balance < bill.amount) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ success: false, message: "Insufficient balance" });
+//     }
+
+//     user.balance -= bill.amount;
+//     await user.save({ session });
+
+//     bill.status = "paid";
+//     bill.daysOverdue = 0;
+//     await bill.save({ session });
+//     await addTransaction(
+//       {
+//         userId: user._id,
+//         type: "bill_payment",
+//         amount: bill.amount,
+//         currency: user.currency || "BDT",
+//         meta: {
+//           billId: bill._id,
+//           billName: bill.name,
+//           company: bill.company,
+//           dueDate: bill.dueDate,
+//         },
+//         status: "completed",
+//       },
+//       session
+//     );
+
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Bill paid successfully",
+//       bill,
+//       userBalance: user.balance
+//     });
+
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error("PayBill error:", error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// };
+
 export const payBill = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -84,6 +158,7 @@ export const payBill = async (req, res) => {
     const { id } = req.params; 
     const { email } = req.user;
 
+    // ✅ Find bill
     const bill = await Bill.findById(id).session(session);
     if (!bill) {
       await session.abortTransaction();
@@ -96,38 +171,50 @@ export const payBill = async (req, res) => {
       return res.status(400).json({ success: false, message: "Bill already paid" });
     }
 
-    // 2️⃣ User balance check
+    // ✅ Find user
     const user = await User.findOne({ email }).session(session);
     if (!user) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ success: false, message: "User not found" });
     }
+
     if (user.balance < bill.amount) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ success: false, message: "Insufficient balance" });
     }
 
+    // Save previous balance
+    const userBalanceBefore = user.balance;
+
+    // ✅ Deduct balance
     user.balance -= bill.amount;
     await user.save({ session });
 
+    // ✅ Update bill status
     bill.status = "paid";
     bill.daysOverdue = 0;
     await bill.save({ session });
+
+    // ✅ Add transaction history (single call)
     await addTransaction(
       {
-        userId: user._id,
+        senderId: user._id,        // user paying the bill
+        receiverId: null,          // no specific receiver
         type: "bill_payment",
         amount: bill.amount,
         currency: user.currency || "BDT",
+        status: "completed",
         meta: {
           billId: bill._id,
           billName: bill.name,
           company: bill.company,
           dueDate: bill.dueDate,
+          userEmail: user.email,
+          userBalanceBefore,
+          userBalanceAfter: user.balance,
         },
-        status: "completed",
       },
       session
     );
