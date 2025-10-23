@@ -73,10 +73,157 @@
 
 
 
+// import mongoose from "mongoose";
+// import User from "../models/userModel.js";
+// import Remittance from "../models/RemittanceModel.js";
+// import { addTransaction } from "../helpers/transactionService.js"; // ✅ Transaction history service
+
+// // ✅ Only USD ↔ BDT exchange rates
+// const exchangeRates = {
+//   USD: { BDT: 110.45 },
+//   BDT: { USD: 0.009 },
+// };
+
+// export const sendRemittance = async (req, res) => {
+//   const session = await mongoose.startSession();
+//   session.startTransaction();
+
+//   try {
+//     const { senderEmail, receiverEmail, amount } = req.body;
+
+//     if (!senderEmail || !receiverEmail || !amount) {
+//       return res.status(400).json({ success: false, message: "Missing fields" });
+//     }
+
+//     // ✅ Find both users
+//     const sender = await User.findOne({ email: senderEmail }).session(session);
+//     const receiver = await User.findOne({ email: receiverEmail }).session(session);
+
+//     if (!sender || !receiver) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(404).json({ success: false, message: "User not found" });
+//     }
+
+//     // ✅ Only allow USD ↔ BDT transfers
+//     if (
+//       (sender.currency === "USD" && receiver.currency !== "BDT") ||
+//       (sender.currency === "BDT" && receiver.currency !== "USD")
+//     ) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({
+//         success: false,
+//         message: "Only USD ↔ BDT remittance allowed",
+//       });
+//     }
+
+//     const rate = exchangeRates[sender.currency][receiver.currency];
+//     const amountSent = parseFloat(amount);
+//     const amountReceived = parseFloat((amountSent * rate).toFixed(2));
+
+//     if (isNaN(amountSent) || amountSent <= 0) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ success: false, message: "Invalid amount" });
+//     }
+
+//     // ✅ Check sender balance
+//     if (sender.balance < amountSent) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(400).json({ success: false, message: "Insufficient balance" });
+//     }
+
+//     // ✅ Update balances
+//     sender.balance -= amountSent;
+//     receiver.balance += amountReceived;
+//     await sender.save({ session });
+//     await receiver.save({ session });
+
+//     // ✅ Save remittance record
+//     const remittance = await Remittance.create(
+//       [
+//         {
+//           senderEmail,
+//           receiverEmail,
+//           amountSent,
+//           amountReceived,
+//           fromCurrency: sender.currency,
+//           toCurrency: receiver.currency,
+//           rateUsed: rate,
+//           status: "Completed",
+//         },
+//       ],
+//       { session }
+//     );
+
+//     // ✅ Add transaction history for both users
+//     await addTransaction(
+//       {
+//         userId: sender._id,
+//         type: "sendmoney",
+//         amount: amountSent,
+//         currency: sender.currency,
+//         meta: {
+//           receiverEmail,
+//           rate,
+//           toCurrency: receiver.currency,
+//           amountReceived,
+//           remittanceId: remittance[0]._id,
+//         },
+//         status: "completed",
+//       },
+//       session
+//     );
+
+//     await addTransaction(
+//       {
+//         userId: receiver._id,
+//         type: "addmoney",
+//         amount: amountReceived,
+//         currency: receiver.currency,
+//         meta: {
+//           senderEmail,
+//           rate,
+//           fromCurrency: sender.currency,
+//           amountSent,
+//           remittanceId: remittance[0]._id,
+//         },
+//         status: "completed",
+//       },
+//       session
+//     );
+
+//     // ✅ Commit transaction
+//     await session.commitTransaction();
+//     session.endSession();
+
+//     return res.status(200).json({
+//       success: true,
+//       message: "Remittance sent successfully!",
+//       data: {
+//         amountSent,
+//         amountReceived,
+//         fromCurrency: sender.currency,
+//         toCurrency: receiver.currency,
+//         rateUsed: rate,
+//       },
+//     });
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error("Remittance error:", error);
+//     return res.status(500).json({ success: false, message: "Server error", error: error.message });
+//   }
+// };
+
+
+
 import mongoose from "mongoose";
 import User from "../models/userModel.js";
 import Remittance from "../models/RemittanceModel.js";
-import { addTransaction } from "../helpers/transactionService.js"; // ✅ Transaction history service
+import { addTransaction } from "../helpers/transactionService.js";
 
 // ✅ Only USD ↔ BDT exchange rates
 const exchangeRates = {
@@ -105,7 +252,7 @@ export const sendRemittance = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // ✅ Only allow USD ↔ BDT transfers
+    // ✅ Only USD ↔ BDT transfers
     if (
       (sender.currency === "USD" && receiver.currency !== "BDT") ||
       (sender.currency === "BDT" && receiver.currency !== "USD")
@@ -135,9 +282,14 @@ export const sendRemittance = async (req, res) => {
       return res.status(400).json({ success: false, message: "Insufficient balance" });
     }
 
+    // ✅ Save previous balances for transaction
+    const senderBalanceBefore = sender.balance;
+    const receiverBalanceBefore = receiver.balance;
+
     // ✅ Update balances
     sender.balance -= amountSent;
     receiver.balance += amountReceived;
+
     await sender.save({ session });
     await receiver.save({ session });
 
@@ -158,39 +310,27 @@ export const sendRemittance = async (req, res) => {
       { session }
     );
 
-    // ✅ Add transaction history for both users
+    // ✅ Add transaction record
     await addTransaction(
       {
-        userId: sender._id,
+        senderId: sender._id,
+        receiverId: receiver._id,
         type: "sendmoney",
         amount: amountSent,
         currency: sender.currency,
+        status: "completed",
+        senderBalanceBefore,
+        senderBalanceAfter: sender.balance,
+        receiverBalanceBefore,
+        receiverBalanceAfter: receiver.balance,
         meta: {
-          receiverEmail,
           rate,
+          fromCurrency: sender.currency,
           toCurrency: receiver.currency,
+          amountSent,
           amountReceived,
           remittanceId: remittance[0]._id,
         },
-        status: "completed",
-      },
-      session
-    );
-
-    await addTransaction(
-      {
-        userId: receiver._id,
-        type: "addmoney",
-        amount: amountReceived,
-        currency: receiver.currency,
-        meta: {
-          senderEmail,
-          rate,
-          fromCurrency: sender.currency,
-          amountSent,
-          remittanceId: remittance[0]._id,
-        },
-        status: "completed",
       },
       session
     );
@@ -214,7 +354,11 @@ export const sendRemittance = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
     console.error("Remittance error:", error);
-    return res.status(500).json({ success: false, message: "Server error", error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
   }
 };
 
