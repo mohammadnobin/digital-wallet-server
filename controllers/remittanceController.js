@@ -319,10 +319,6 @@ export const sendRemittance = async (req, res) => {
         amount: amountSent,
         currency: sender.currency,
         status: "completed",
-        senderBalanceBefore,
-        senderBalanceAfter: sender.balance,
-        receiverBalanceBefore,
-        receiverBalanceAfter: receiver.balance,
         meta: {
           rate,
           fromCurrency: sender.currency,
