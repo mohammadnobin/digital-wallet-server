@@ -3,32 +3,51 @@ import TransactionHistory from "../models/TransactionModel.js";
 
 
 // Admin fetch all transactions with pagination
+// export const getAllTransactions = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     const transactions = await TransactionHistory.find()
+//       .sort({ createdAt: -1 })
+//       .skip(skip)
+//       .limit(limit);
+
+//     const total = await TransactionHistory.countDocuments();
+
+//     res.status(200).json({
+//       success: true,
+//       total,
+//       page,
+//       limit,
+//       transactions,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
+
+
 export const getAllTransactions = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
     const transactions = await TransactionHistory.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await TransactionHistory.countDocuments();
+      .populate("senderId", "name email photo")
+      .populate("receiverId", "name email photo")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
-      total,
-      page,
-      limit,
-      transactions,
+      message: "All transactions fetched successfully",
+      data: transactions,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
-
-
 
 export const getMyTransactions = async (req, res) => {
   try {
