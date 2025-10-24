@@ -122,40 +122,6 @@ const logoutUser = async (req, res) => {
 };
 
 
-
-//   const { email, password } = req.body;
-
-//   try {
-//     const user = await User.find({ email });
-
-//     if (user) {
-//       const isValidPassword = await bcrypt.compare(password, user[0].password);
-//       if (isValidPassword) {
-//         const token = jwt.sign(
-//           { email: user.email, userId: user._id },
-//           process.env.JWT_SECRET,
-//           {
-//             expiresIn: "1h",
-//           }
-//         );
-//         res.status(200).json({
-//           message: "User Login Successfully",
-//           accessToken: token,
-//           data: {
-//             name: user[0].name,
-//             email,
-//             userId: user[0]._id,
-//           },
-//         });
-//       } else {
-//         res.status(500).send("err.message is");
-//       }
-//     }
-//   } catch (err) {
-//     res.status(500).send(err.message);
-//   }
-// };
-
 // @desc Get all users
 export const getUsers = async (req, res) => {
   try {
@@ -184,4 +150,49 @@ export const getUserByEmail = async (req, res) => {
   }
 };
 
+
+
+export const updateUserRole = async (req, res) => {
+  try {
+    const { userId, role } = req.body;
+    if (!["user", "admin"].includes(role)) return res.status(400).json({ message: "Invalid role" });
+
+    const user = await User.findByIdAndUpdate(userId, { role }, { new: true }).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Toggle active status
+export const toggleUserStatus = async (req, res) => {
+  try {
+    const { userId, isActive } = req.body;
+    const user = await User.findByIdAndUpdate(userId, { isActive }, { new: true }).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete user
+export const deleteUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findByIdAndDelete(userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
 export { loginUser,logoutUser,registerUser};
+

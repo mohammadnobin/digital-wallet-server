@@ -9,6 +9,7 @@ import cardsRoutes from "./routes/cardRoutes.js";
 import splitBillRoutes from "./routes/billRoutes.js";
 import transferRoutes from "./routes/transferRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
+import billRoutes from "./routes/billlsRoutes.js";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 
@@ -36,6 +37,7 @@ app.use("/api/cards", cardsRoutes);
 app.use("/api/splitbills", splitBillRoutes);
 app.use("/api/transfers", transferRoutes );
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/bills", billRoutes);
 // Default route
 app.get("/", (req, res) => {
   res.send("Digital Wallet API running...");
