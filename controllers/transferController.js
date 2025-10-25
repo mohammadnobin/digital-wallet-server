@@ -109,7 +109,6 @@
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("Send money error:", error);
 //     res.status(500).json({ message: "Server error", error: error.message });
 //   }
 // };
@@ -213,7 +212,6 @@ export const sendMoney = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Send money error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -234,7 +232,6 @@ export const getTransfersByEmail = async (req, res) => {
 
     res.status(200).json(transfers);
   } catch (error) {
-    console.error("Get transfers error:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };

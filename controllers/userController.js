@@ -91,7 +91,6 @@ const registerUser = async (req, res) =>{
         message: "User logged in successfully",
       });
   } catch (error) {
-     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -113,7 +112,6 @@ const logoutUser = async (req, res) => {
         message: "Access token cleared successfully"
       });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       status: 500,
       message: "Internal server error"

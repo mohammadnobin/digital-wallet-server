@@ -77,7 +77,6 @@ export const getAllTransactions = async (req, res) => {
       transactions,
     });
   } catch (error) {
-    console.error("Get transactions error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -142,7 +141,6 @@ export const getMyTransactions = async (req, res) => {
       transactions,
     });
   } catch (error) {
-    console.error("Get my transactions error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -182,7 +180,7 @@ export const getMyTransactions = async (req, res) => {
 //       totalSaved
 //     });
 //   } catch (error) {
-//     console.error(error);
+
 //     res.status(500).json({ message: "Server error", error: error.message });
 //   }
 // };
@@ -308,7 +306,6 @@ export const getMyTransactions = async (req, res) => {
 //       },
 //     });
 //   } catch (error) {
-//     console.error("Summary error:", error);
 //     res.status(500).json({
 //       success: false,
 //       message: error.message,
@@ -329,7 +326,7 @@ export const getTransactionSummary = async (req, res) => {
     }
 
     // Debugging logs
-    console.log("Summary request by user:", userId);
+
 
     const user = await User.findById(userId).select("balance currency");
     if (!user) {
@@ -390,7 +387,6 @@ export const getTransactionSummary = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Summary error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
