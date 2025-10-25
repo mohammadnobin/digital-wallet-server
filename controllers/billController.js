@@ -23,7 +23,7 @@ export const createBill = async (req, res) => {
 
     res.status(201).json({ success: true, bill: newBill });
   } catch (err) {
-    console.error(err);
+
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -38,7 +38,7 @@ export const getBills = async (req, res) => {
     const bills = await SplitBill.find(query).sort({ createdAt: -1 });
     res.json({ success: true, bills });
   } catch (err) {
-    console.error(err);
+
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
@@ -58,7 +58,7 @@ export const deleteBill = async (req, res) => {
 
     res.json({ success: true, message: "Bill deleted successfully", id });
   } catch (err) {
-    console.error("Delete Bill Error:", err);
+
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
