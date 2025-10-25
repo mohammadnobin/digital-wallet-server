@@ -17,7 +17,6 @@ export const addCard = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // ✅ Create new card
     const card = new Card({
       user: userId,
       cardName,
@@ -30,8 +29,7 @@ export const addCard = async (req, res) => {
 
     await card.save({ session });
 
-    // ✅ Transaction history
-    const user = req.user; // assuming req.user has latest user data
+    const user = req.user; 
     const userBalanceBefore = Number(balance) ? user.balance - Number(balance) : user.balance;
 
     await addTransaction(
@@ -85,33 +83,6 @@ export const getMyCards = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-
-// export const addCard = async (req, res) => {
-//   try {
-//     const userId = req.user._id;
-//     const { cardName, cardNumber, expiryDate, cardType, balance, bank } = req.body;
-//     if (!cardName || !cardNumber || !expiryDate) {
-//       return res.status(400).json({ message: "Missing required fields" });
-//     }
-//     const card = new Card({
-//       user: userId,
-//       cardName,
-//       cardNumber,
-//       expiryDate,
-//       cardType,
-//       balance: Number(balance) || 0,
-//       meta: { bank, last4: cardNumber.slice(-4) },
-//     });
-//     await card.save();
-  
-//     const obj = card.toObject();
-//     delete obj.cardNumber; 
-//     obj._id = card._id;
-//     return res.status(201).json(obj);
-//   } catch (err) {
-//     return res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 export const updateCard = async (req, res) => {
   try {
