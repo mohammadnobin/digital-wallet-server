@@ -30,8 +30,6 @@ export async function addTransaction(
   },
   session = null
 ) {
-  // 🖨️ Debug: input check
-  // console.log("Transaction Input:", { senderId, receiverId, type, amount });
 
   const tx = new TransactionHistory({
     senderId,

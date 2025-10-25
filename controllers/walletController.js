@@ -48,7 +48,6 @@
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("AddMoney Error:", error);
 //     return res.status(500).json({ message: "Server error", error: error.message });
 //   }
 // };
@@ -114,7 +113,6 @@
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("Cashout Error:", error);
 //     res.status(500).json({ message: "Server error", error: error.message });
 //   }
 // };
@@ -182,7 +180,6 @@ export const addMoney = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("AddMoney Error:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -257,7 +254,6 @@ export const cashout = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Cashout Error:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -288,7 +284,6 @@ export const current = async (req, res) => {
 
     res.json(data);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

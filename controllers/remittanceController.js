@@ -66,7 +66,6 @@
 //     });
 
 //   } catch (error) {
-//     console.error("Remittance error:", error);
 //     return res.status(500).json({ success: false, message: "Server error" });
 //   }
 // };
@@ -213,7 +212,6 @@
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("Remittance error:", error);
 //     return res.status(500).json({ success: false, message: "Server error", error: error.message });
 //   }
 // };
@@ -349,7 +347,6 @@ export const sendRemittance = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Remittance error:", error);
     return res.status(500).json({
       success: false,
       message: "Server error",

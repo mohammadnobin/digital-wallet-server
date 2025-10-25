@@ -67,7 +67,6 @@
 //       data: newRequest,
 //     });
 //   } catch (error) {
-//     console.error("Error creating request:", error);
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
@@ -212,7 +211,6 @@
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("Error updating request status:", error);
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
@@ -297,7 +295,6 @@ export const createRequest = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Error creating request:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -423,7 +420,6 @@ export const updateRequestStatus = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("Error updating request status:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -579,7 +575,7 @@ export const getUserRequests = async (req, res) => {
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("Error updating request status:", error);
+
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
