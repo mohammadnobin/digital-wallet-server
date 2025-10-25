@@ -31,7 +31,7 @@ export const addBill = async (req, res) => {
       bill,
     });
   } catch (error) {
-    console.error("Error adding bill:", error);
+
     return res.status(500).json({
       success: false,
       message: error.message || "Server error while adding bill",
@@ -145,7 +145,7 @@ export const updateBill = async (req, res) => {
 //   } catch (error) {
 //     await session.abortTransaction();
 //     session.endSession();
-//     console.error("PayBill error:", error);
+
 //     res.status(500).json({ success: false, message: error.message });
 //   }
 // };
@@ -232,7 +232,7 @@ export const payBill = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    console.error("PayBill error:", error);
+
     res.status(500).json({ success: false, message: error.message });
   }
 };
