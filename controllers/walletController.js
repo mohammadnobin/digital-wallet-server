@@ -29,7 +29,7 @@ export const addMoney = async (req, res) => {
     // ✅ Update balance
     userDemo.balance += addAmount;
     await userDemo.save({ session });
-
+const io = req.app.get("io");
     // ✅ Save transaction
     const transaction = await addTransaction(
       {
@@ -44,7 +44,7 @@ export const addMoney = async (req, res) => {
           details,
         },
       },
-      session
+      session, io
     );
 
     await session.commitTransaction();
@@ -102,7 +102,7 @@ export const cashout = async (req, res) => {
     // ✅ Update balance
     userDemo.balance -= totalDeduct;
     await userDemo.save({ session });
-
+const io = req.app.get("io");
     // ✅ Add Transaction Record
     const transaction = await addTransaction(
       {
@@ -118,7 +118,7 @@ export const cashout = async (req, res) => {
           fee,
         },
       },
-      session
+      session, io
     );
 
     await session.commitTransaction();
