@@ -40,7 +40,7 @@ export const createRequest = async (req, res) => {
       ],
       { session }
     );
-
+const io = req.app.get("io");
     //  Single addTransaction for request creation
     await addTransaction(
       {
@@ -58,7 +58,8 @@ export const createRequest = async (req, res) => {
           messageReceiver: `You received a money request from ${sender.email}`,
         },
       },
-      session
+      session,
+      io
     );
 
     await session.commitTransaction();
@@ -80,7 +81,7 @@ export const createRequest = async (req, res) => {
 export const updateRequestStatus = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
-
+const io = req.app.get("io");
   try {
     const { requestId, status } = req.body;
 
@@ -141,7 +142,8 @@ export const updateRequestStatus = async (req, res) => {
             receiverBalanceBefore,
           },
         },
-        session
+        session,
+        io
       );
 
       request.status = "Approved";
@@ -178,7 +180,8 @@ export const updateRequestStatus = async (req, res) => {
             messageReceiver: "You declined a request",
           },
         },
-        session
+        session,
+        io
       );
 
       await session.commitTransaction();
