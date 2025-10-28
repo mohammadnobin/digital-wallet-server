@@ -31,7 +31,7 @@ export const addCard = async (req, res) => {
 
     const user = req.user; 
     const userBalanceBefore = Number(balance) ? user.balance - Number(balance) : user.balance;
-
+const io = req.app.get("io");
     await addTransaction(
       {
         senderId: user._id,
@@ -51,7 +51,7 @@ export const addCard = async (req, res) => {
           userBalanceAfter: user.balance,
         },
       },
-      session
+      session, io
     );
 
     await session.commitTransaction();
