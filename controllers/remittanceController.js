@@ -79,7 +79,7 @@ export const sendRemittance = async (req, res) => {
       ],
       { session }
     );
-
+const io = req.app.get("io");
     await addTransaction(
       {
         senderId: sender._id,
@@ -97,7 +97,7 @@ export const sendRemittance = async (req, res) => {
           remittanceId: remittance[0]._id,
         },
       },
-      session
+      session, io
     );
 
     await session.commitTransaction();

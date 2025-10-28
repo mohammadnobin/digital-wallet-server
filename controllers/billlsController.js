@@ -196,7 +196,7 @@ export const payBill = async (req, res) => {
     bill.status = "paid";
     bill.daysOverdue = 0;
     await bill.save({ session });
-
+const io = req.app.get("io");
     // ✅ Add transaction history (single call)
     await addTransaction(
       {
@@ -216,7 +216,7 @@ export const payBill = async (req, res) => {
           userBalanceAfter: user.balance,
         },
       },
-      session
+      session, io
     );
 
     await session.commitTransaction();
