@@ -37,6 +37,45 @@ export const getAllTransactions = async (req, res) => {
 
 
 
+// export const getMyTransactions = async (req, res) => {
+//   try {
+//     const userId = req.user._id;
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 10;
+//     const skip = (page - 1) * limit;
+
+//     // ✅ Filter transactions where user is sender OR receiver
+//     const query = {
+//       $or: [{ senderId: userId }, { receiverId: userId }],
+//     };
+
+//     const transactions = await TransactionHistory.find(query)
+//       .populate("senderId", "name email photo")
+//       .populate("receiverId", "name email photo")
+//       .sort({ createdAt: -1 })
+//       .skip(skip)
+//       .limit(limit);
+
+//     const total = await TransactionHistory.countDocuments(query);
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Your transactions fetched successfully",
+//       total,
+//       page,
+//       limit,
+//       transactions,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+
 export const getMyTransactions = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -44,7 +83,7 @@ export const getMyTransactions = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    // ✅ Filter transactions where user is sender OR receiver
+    // Filter transactions where user is sender OR receiver
     const query = {
       $or: [{ senderId: userId }, { receiverId: userId }],
     };
@@ -58,13 +97,37 @@ export const getMyTransactions = async (req, res) => {
 
     const total = await TransactionHistory.countDocuments(query);
 
+    // Format transactions for frontend
+    const formattedTransactions = transactions.map((tx) => ({
+      _id: tx._id,
+      type: tx.type || "Unknown",
+      status: tx.status || "Unknown",
+      amount: tx.amount || 0,
+      currency: tx.currency || "BDT",
+      createdAt: tx.createdAt,
+      updatedAt: tx.updatedAt,
+      meta: tx.meta || {},
+      senderId: {
+        _id: tx.senderId?._id || null,
+        name: tx.senderId?.name || tx.meta?.fromUserEmail || "Unknown",
+        email: tx.senderId?.email || tx.meta?.fromUserEmail || "Unknown",
+        photo: tx.senderId?.photo || "",
+      },
+      receiverId: {
+        _id: tx.receiverId?._id || null,
+        name: tx.receiverId?.name || tx.meta?.toUserEmail || "Unknown",
+        email: tx.receiverId?.email || tx.meta?.toUserEmail || "Unknown",
+        photo: tx.receiverId?.photo || "",
+      },
+    }));
+
     res.status(200).json({
       success: true,
-      message: "Your transactions fetched successfully",
+      message: "Transactions fetched successfully",
       total,
       page,
       limit,
-      transactions,
+      transactions: formattedTransactions,
     });
   } catch (error) {
     res.status(500).json({
@@ -73,7 +136,6 @@ export const getMyTransactions = async (req, res) => {
     });
   }
 };
-
 
 export const getTransactionSummary = async (req, res) => {
   try {
