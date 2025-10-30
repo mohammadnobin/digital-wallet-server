@@ -117,17 +117,14 @@ app.get("/", (req, res) => {
 
 // ✅ Socket.io connection
 io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
 
   socket.on("join", (email) => {
     if (email) {
       socket.join(email);
-      console.log(`📨 ${email} joined room`);
     }
   });
 
   socket.on("disconnect", () => {
-    console.log("🔴 User disconnected:", socket.id);
   });
 });
 
