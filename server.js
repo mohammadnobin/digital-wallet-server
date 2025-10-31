@@ -77,7 +77,7 @@ const httpServer = createServer(app);
 // ✅ Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app"],
+    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app","https://digital-wallet-3zky.vercel.app"],
      methods: ["GET", "POST"],
     credentials: true,
   },
@@ -90,7 +90,7 @@ app.set("io", io);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app"],
+    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app","https://digital-wallet-3zky.vercel.app"],
     credentials: true,
   })
 );
