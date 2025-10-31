@@ -29,7 +29,6 @@ export const addMoney = async (req, res) => {
     // ✅ Update balance
     userDemo.balance += addAmount;
     await userDemo.save({ session });
-const io = req.app.get("io");
     // ✅ Save transaction
     const transaction = await addTransaction(
       {
@@ -44,7 +43,7 @@ const io = req.app.get("io");
           details,
         },
       },
-      session, io
+      session,
     );
 
     await session.commitTransaction();
