@@ -77,7 +77,7 @@ const httpServer = createServer(app);
 // ✅ Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app"],
+    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app","https://digital-wallet-3zky.vercel.app"],
      methods: ["GET", "POST"],
     credentials: true,
   },
@@ -90,7 +90,7 @@ app.set("io", io);
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app"],
+    origin: ["http://localhost:3000", "https://digital-wallet-sage.vercel.app","https://digital-wallet-3zky.vercel.app"],
     credentials: true,
   })
 );
@@ -117,17 +117,14 @@ app.get("/", (req, res) => {
 
 // ✅ Socket.io connection
 io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
 
   socket.on("join", (email) => {
     if (email) {
       socket.join(email);
-      console.log(`📨 ${email} joined room`);
     }
   });
 
   socket.on("disconnect", () => {
-    console.log("🔴 User disconnected:", socket.id);
   });
 });
 
